@@ -7,7 +7,7 @@ import {
   TransactionFilters
 } from '@/types/kirapay';
 
-const API_BASE_URL = 'https://kirapay.focalfossa.site/api';
+const API_BASE_URL = 'https://kirapay-docs.holatech.app/api';
 
 // get the API key from environment variables
 const getApiKey = (): string => {
