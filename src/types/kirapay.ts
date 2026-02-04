@@ -1,86 +1,110 @@
 // KiraPay API Types
-export interface PaymentLink {
-  _id: string;
-  code: string;
-  price: number;
-  tokenOut: {
-    symbol: string;
-    address: string;
-    decimals: number;
-    chain: string;
-  };
-  receiver: string;
-  user: {
-    _id: string;
-    username: string;
-    address: string;
-    isVerified: boolean;
-  };
-  name: string;
-  redirectUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  url: string;
-}
-
-export interface Transaction {
-  _id: string;
-  transaction_hash: string;
-  status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
-  amount: number;
-  token: string;
-  from: string;
-  to: string;
-  createdAt: string;
-}
-
 export interface CreateLinkRequest {
-  currency: string;
   receiver: string;
   price: number;
-  name: string;
+  name?: string;
+  customOrderId?: string;
   redirectUrl?: string;
+  type?: "single_use" | "unlimited";
 }
 
 export interface CreateLinkResponse {
-  message: string;
-  data: {
-    url: string;
+  url: string;
+}
+
+export interface LinkTokenOut {
+  symbol: string;
+  decimals: number;
+  address: string;
+  chainId: string;
+  amount: string;
+}
+
+export interface LinkTransaction {
+  status: string;
+  protocol: string;
+  sender: string;
+  receiver: string;
+  amount: string;
+  tokenIn?: {
+    symbol: string;
+    amount: string;
   };
-}
-
-export interface GetLinksResponse {
-  message: string;
-  data: {
-    links: PaymentLink[];
-    total: number;
-    page: number;
-    totalPages: number;
+  settlementAmount?: string;
+  tokenOut?: {
+    symbol: string;
   };
+  createdAt: string;
 }
 
-export interface GetLinkByCodeResponse {
-  message: string;
-  data: PaymentLink;
-}
-
-export interface GetTransactionsResponse {
-  message: string;
-  data: {
-    transactions: Transaction[];
-    total: number;
-    page: number;
-    totalPages: number;
+export interface PaymentLinkDetail {
+  _id: string;
+  code: string;
+  price: number;
+  name?: string;
+  receiver: string;
+  tokenOut?: LinkTokenOut;
+  type?: "single_use" | "unlimited";
+  status?: "active" | "used" | "expired" | "disabled";
+  fiatCurrency?: string;
+  redirectUrl?: string;
+  customOrderId?: string;
+  expiredAt?: string;
+  createdAt: string;
+  user?: {
+    _id: string;
+    username: string;
   };
+  project?: {
+    _id: string;
+    name: string;
+  };
+  url?: string;
+  txs?: LinkTransaction[];
 }
 
-export interface TransactionFilters {
-  status?: string;
-  transaction_hash?: string;
-  from_date?: string;
-  to_date?: string;
-  page?: number;
-  limit?: number;
+export interface GetLinkByCodeResponse extends PaymentLinkDetail {}
+
+export interface CreateWebhookRequest {
+  url: string;
+  secret: string;
+}
+
+export interface Webhook {
+  _id: string;
+  url: string;
+  createdAt: string;
+}
+
+export interface CreateWebhookResponse {
+  message: string;
+  webhook: Webhook;
+}
+
+export type GetWebhookResponse =
+  | Webhook
+  | {
+      message: string;
+    };
+
+export interface DeleteWebhookResponse {
+  message: string;
+}
+
+export interface WebhookEventPayload {
+  event: "transaction.created" | "transaction.succeeded" | "transaction.failed" | "transaction.refund";
+  timestamp: string;
+  data: {
+    transactionId: string;
+    linkCode: string;
+    customOrderId?: string;
+    amount: string;
+    currency: string;
+    sender: string;
+    receiver: string;
+    status: string;
+    settlementAmount?: string;
+  };
 }
 
 export interface ApiError {

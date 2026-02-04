@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Link as LinkIcon, Wallet } from "lucide-react";
+import { Plus, Bell } from "lucide-react";
 import CreateLinkForm from "@/components/CreateLinkForm";
-import LinksList from "@/components/LinksList";
-import TransactionsList from "@/components/TransactionsList";
+import WebhookManager from "@/components/WebhookManager";
 import LinkLookup from "@/components/LinkLookup";
 import StatusMessage from "@/components/StatusMessage";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'create' | 'links' | 'transactions'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'webhooks'>('create');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -35,7 +34,7 @@ export default function Home() {
             KiraPay API Demo
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Create payment links, manage transactions, and explore the KiraPay API
+            Create payment links, manage webhooks, and explore the KiraPay API
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             Configure your API key in the environment variables to get started
@@ -52,12 +51,11 @@ export default function Home() {
             <div className="flex border-b border-gray-200 dark:border-gray-700">
               {[
                 { id: 'create', label: 'Create Link', icon: Plus },
-                { id: 'links', label: 'My Links', icon: LinkIcon },
-                { id: 'transactions', label: 'Transactions', icon: Wallet }
+                { id: 'webhooks', label: 'Webhooks', icon: Bell }
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => setActiveTab(id as 'create' | 'links' | 'transactions')}
+                  onClick={() => setActiveTab(id as 'create' | 'webhooks')}
                   className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                     activeTab === id
                       ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
@@ -78,12 +76,11 @@ export default function Home() {
                 />
               )}
 
-              {activeTab === 'links' && (
-                <LinksList onCopySuccess={handleSuccess} />
-              )}
-
-              {activeTab === 'transactions' && (
-                <TransactionsList onCopySuccess={handleSuccess} />
+              {activeTab === 'webhooks' && (
+                <WebhookManager
+                  onSuccess={handleSuccess}
+                  onError={handleError}
+                />
               )}
             </div>
           </div>

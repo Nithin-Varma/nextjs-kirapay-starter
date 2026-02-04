@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Eye, Copy, X } from "lucide-react";
-import { PaymentLink } from "@/types/kirapay";
+import { PaymentLinkDetail } from "@/types/kirapay";
 import { getLinkByCode } from "@/lib/kirapay-api";
 
 interface LinkLookupProps {
@@ -12,7 +12,7 @@ interface LinkLookupProps {
 
 export default function LinkLookup({ onError, onCopySuccess }: LinkLookupProps) {
   const [linkCode, setLinkCode] = useState('');
-  const [selectedLink, setSelectedLink] = useState<PaymentLink | null>(null);
+  const [selectedLink, setSelectedLink] = useState<PaymentLinkDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
   const getLinkWithCode = async (code: string) => {
@@ -26,7 +26,7 @@ export default function LinkLookup({ onError, onCopySuccess }: LinkLookupProps) 
 
     try {
       const link = await getLinkByCode(code.trim());
-      setSelectedLink(link.data);
+      setSelectedLink(link);
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to fetch link details');
     } finally {
@@ -98,7 +98,7 @@ export default function LinkLookup({ onError, onCopySuccess }: LinkLookupProps) 
                     Amount
                   </label>
                   <p className="text-gray-900 dark:text-white">
-                    {selectedLink.price} {selectedLink.tokenOut.symbol}
+                    {selectedLink.price} {selectedLink.tokenOut?.symbol || 'USDC'}
                   </p>
                 </div>
                 
@@ -126,10 +126,10 @@ export default function LinkLookup({ onError, onCopySuccess }: LinkLookupProps) 
                   </label>
                   <div className="flex items-center gap-2">
                     <p className="text-gray-900 dark:text-white font-mono text-sm flex-1 break-all">
-                      https://kirapay.focalfossa.site/{selectedLink.code}
+                      {selectedLink.url || `https://pay.kirapay.io/${selectedLink.code}`}
                     </p>
                     <button
-                      onClick={() => copyToClipboard(`https://kirapay.focalfossa.site/${selectedLink.code}`)}
+                      onClick={() => copyToClipboard(selectedLink.url || `https://pay.kirapay.io/${selectedLink.code}`)}
                       className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
                     >
                       <Copy className="h-4 w-4" />
@@ -157,14 +157,16 @@ export default function LinkLookup({ onError, onCopySuccess }: LinkLookupProps) 
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    User
-                  </label>
-                  <p className="text-gray-900 dark:text-white text-sm">
-                    {selectedLink.user.username} {selectedLink.user.isVerified && '(Verified)'}
-                  </p>
-                </div>
+                {selectedLink.user && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      User
+                    </label>
+                    <p className="text-gray-900 dark:text-white text-sm">
+                      {selectedLink.user.username}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
-    "setup": "node setup-env.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

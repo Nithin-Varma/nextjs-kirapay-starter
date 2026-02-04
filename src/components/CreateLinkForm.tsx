@@ -13,16 +13,17 @@ interface CreateLinkFormProps {
 export default function CreateLinkForm({ onSuccess, onError }: CreateLinkFormProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateLinkRequest>({
-    currency: 'USDC',
     receiver: '',
     price: 0,
     name: '',
-    redirectUrl: ''
+    customOrderId: '',
+    redirectUrl: '',
+    type: 'single_use'
   });
 
   const handleCreatePaymentLink = async () => {
-    if (!formData.receiver || !formData.price || !formData.name) {
-      onError('Please fill in all required fields');
+    if (!formData.receiver || !formData.price) {
+      onError('Please fill in the required fields');
       return;
     }
 
@@ -30,15 +31,23 @@ export default function CreateLinkForm({ onSuccess, onError }: CreateLinkFormPro
     onError('');
 
     try {
-      const response = await createPaymentLink(formData);
+      const response = await createPaymentLink({
+        receiver: formData.receiver,
+        price: formData.price,
+        name: formData.name || undefined,
+        customOrderId: formData.customOrderId || undefined,
+        redirectUrl: formData.redirectUrl || undefined,
+        type: formData.type || undefined
+      });
       
-      onSuccess(`Payment link created successfully! Link: ${response.data.url}`);
+      onSuccess(`Payment link created successfully! Link: ${response.url}`);
       setFormData({
-        currency: 'USDC',
         receiver: '',
         price: 0,
         name: '',
-        redirectUrl: ''
+        customOrderId: '',
+        redirectUrl: '',
+        type: 'single_use'
       });
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to create payment link');
@@ -54,19 +63,6 @@ export default function CreateLinkForm({ onSuccess, onError }: CreateLinkFormPro
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Currency *
-          </label>
-          <select
-            value={formData.currency}
-            onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="USDC">USDC</option>
-          </select>
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Amount *
@@ -95,9 +91,36 @@ export default function CreateLinkForm({ onSuccess, onError }: CreateLinkFormPro
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Link Type
+          </label>
+          <select
+            value={formData.type || 'single_use'}
+            onChange={(e) => setFormData({ ...formData, type: e.target.value as CreateLinkRequest['type'] })}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="single_use">Single use</option>
+            <option value="unlimited">Unlimited</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Custom Order ID (Optional)
+          </label>
+          <input
+            type="text"
+            value={formData.customOrderId}
+            onChange={(e) => setFormData({ ...formData, customOrderId: e.target.value })}
+            placeholder="ORDER-123456"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Payment Name *
+            Payment Name (Optional)
           </label>
           <input
             type="text"
